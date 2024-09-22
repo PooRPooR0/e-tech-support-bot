@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js --ignore sessions.json"
+    "dev": "nodemon index.js --ignore sessions.json",
+    "docker-build": "docker build . -t e-tech-support-bot"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
