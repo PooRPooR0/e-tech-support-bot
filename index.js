@@ -24,16 +24,19 @@ const stage = new Scenes.Stage([menuScene, chatScene])
 
 bot.use(localSession.middleware())
 bot.use(stage.middleware());
-
-bot.start(startHandler)
-bot.on('message', async ctx => {
+bot.use(async (ctx, next) => {
     try {
-        if (ctx.update.message.from.is_bot) return;
-        if (!isAdmin(ctx.update.message.chat.id)) return;
-        await resendToUser(ctx)
+        await next()
     } catch (e) {
         await ctx.reply('Sorry! I have some troubles :-(')
     }
+})
+
+bot.start(startHandler)
+bot.on('message', async ctx => {
+    if (ctx.update.message.from.is_bot) return;
+    if (!isAdmin(ctx.update.message.chat.id)) return;
+    await resendToUser(ctx)
 })
 
 bot.launch()
