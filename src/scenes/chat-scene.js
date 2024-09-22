@@ -1,11 +1,15 @@
 const {Scenes} = require("telegraf");
 const resendToAdmin = require("../resend-to-admin");
 const getAdminChats = require("../utils/get-admin-chats");
+const getUserLang = require("../utils/get-user-lang");
+const {translations} = require("../utils/translations");
 
 const chatScene = new Scenes.BaseScene('chatScene');
 
 chatScene.enter(async (ctx) => {
-    await ctx.replyWithMarkdownV2('Ask your question or send `/menu` to go back')
+    const userLang = getUserLang(ctx)
+
+    await ctx.replyWithMarkdownV2(translations[userLang].chat)
 })
 chatScene.start(async ctx => {
     await ctx.scene.enter('menuScene')

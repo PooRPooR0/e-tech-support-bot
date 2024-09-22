@@ -1,12 +1,17 @@
 const {Scenes, Markup} = require("telegraf");
 const getAdminChats = require("../utils/get-admin-chats");
+const getUserLang = require("../utils/get-user-lang");
+const {translations} = require("../utils/translations");
 
 const menuScene = new Scenes.BaseScene('menuScene');
 
 menuScene.enter(async ctx => {
     ctx.session.adminChatId = null;
     ctx.session.threadKey = null;
-    await ctx.reply('menu scene entered', Markup.inlineKeyboard([
+
+    const userLang = getUserLang(ctx)
+
+    await ctx.reply(translations[userLang].menu, Markup.inlineKeyboard([
         Markup.button.callback('QA', 'qa_enter'),
         Markup.button.callback('Infrastructure', 'infrastructure_enter'),
         Markup.button.callback('Office', 'office_enter'),

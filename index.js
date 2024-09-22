@@ -28,7 +28,7 @@ bot.use(async (ctx, next) => {
     try {
         await next()
     } catch (e) {
-        await ctx.reply('Sorry! I have some troubles :-(')
+        await ctx.reply('BOT ERROR: Sorry! I have some troubles :-(')
     }
 })
 

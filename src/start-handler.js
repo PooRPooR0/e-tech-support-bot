@@ -2,13 +2,12 @@ const isAdmin = require("./utils/is-admin");
 const {languages, translations} = require("./utils/translations");
 const {Scenes} = require("telegraf");
 const getAdminChats = require("./utils/get-admin-chats");
+const getUserLang = require("./utils/get-user-lang");
 
 const startHandler = async ctx => {
     if (isAdmin(ctx.update.message.chat.id)) await ctx.reply('Hi, admin')
     else {
-        let userLang = ctx.update.message?.from?.language_code || 'en'
-        if (!languages.includes(userLang)) userLang = 'en'
-
+        const userLang = getUserLang(ctx);
         await ctx.reply(translations[userLang].start)
         await ctx.scene.enter('menuScene')
 
