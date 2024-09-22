@@ -1,6 +1,7 @@
-const isAdmin = require("./is-admin");
-const {languages, translations} = require("./translations");
+const isAdmin = require("./utils/is-admin");
+const {languages, translations} = require("./utils/translations");
 const {Scenes} = require("telegraf");
+const getAdminChats = require("./utils/get-admin-chats");
 
 const startHandler = async ctx => {
     try {
@@ -19,26 +20,25 @@ const startHandler = async ctx => {
 
             if (!!userTopic) return;
 
-            const topics = await Promise.all([
-                ctx.createForumTopic(ctx.update.message.from.username, {chat_id: process.env.QA_ADMIN_CHAT_ID}),
-                ctx.createForumTopic(ctx.update.message.from.username, {chat_id: process.env.INFRASTRUCTURE_ADMIN_CHAT_ID}),
-                ctx.createForumTopic(ctx.update.message.from.username, {chat_id: process.env.OFFICE_ADMIN_CHAT_ID}),
-            ])
+            const adminChats = getAdminChats();
+
+            const topics = await Promise.all(adminChats.map((chat) =>
+                ctx.createForumTopic(ctx.update.message.from.username, {chat_id: chat.id})
+            ))
 
             const newTopic = {
-                qa_thread_id: topics[0].message_thread_id,
-                infrastructure_thread_id: topics[1].message_thread_id,
-                office_thread_id: topics[2].message_thread_id,
                 chatId: ctx.update.message.chat.id
             }
 
+            topics.forEach((topic, index) => {
+                newTopic[adminChats[index].threadIdKey] = topic.message_thread_id
+            })
+
             ctx.sessionDB.get('topics').push(newTopic).write()
 
-            await Promise.all([
-                ctx.sendMessage('User started chat', {chat_id: process.env.QA_ADMIN_CHAT_ID, message_thread_id: newTopic.qa_thread_id}),
-                ctx.sendMessage('User started chat', {chat_id: process.env.INFRASTRUCTURE_ADMIN_CHAT_ID, message_thread_id: newTopic.infrastructure_thread_id}),
-                ctx.sendMessage('User started chat', {chat_id: process.env.OFFICE_ADMIN_CHAT_ID, message_thread_id: newTopic.office_thread_id}),
-            ])
+            await Promise.all(adminChats.map((chat) =>
+                ctx.sendMessage('User started chat', {chat_id: chat.id, message_thread_id: newTopic[chat.threadIdKey]})
+            ))
         }
     } catch (error) {
         await ctx.reply('Sorry! I have some troubles :-(')

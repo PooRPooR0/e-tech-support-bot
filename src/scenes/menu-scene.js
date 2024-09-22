@@ -1,4 +1,5 @@
 const {Scenes, Markup} = require("telegraf");
+const getAdminChats = require("../utils/get-admin-chats");
 
 const menuScene = new Scenes.BaseScene('menuScene');
 
@@ -11,20 +12,19 @@ menuScene.enter(async ctx => {
         Markup.button.callback('Office', 'office_enter'),
     ]));
 })
-menuScene.action('qa_enter', async (ctx) => {
-    ctx.session.adminChatId = +process.env.QA_ADMIN_CHAT_ID;
-    ctx.session.threadKey = 'qa_thread_id'
-    await ctx.scene.enter('chatScene')
-})
-menuScene.action('infrastructure_enter', async (ctx) => {
-    ctx.session.adminChatId = +process.env.INFRASTRUCTURE_ADMIN_CHAT_ID;
-    ctx.session.threadKey = 'infrastructure_thread_id'
-    await ctx.scene.enter('chatScene')
-})
-menuScene.action('office_enter', async (ctx) => {
-    ctx.session.adminChatId = +process.env.OFFICE_ADMIN_CHAT_ID;
-    ctx.session.threadKey = 'office_thread_id'
-    await ctx.scene.enter('chatScene')
+
+getAdminChats().forEach((chat) => {
+    menuScene.action(chat.action, async (ctx) => {
+        ctx.session.adminChatId = chat.id;
+        ctx.session.threadKey = chat.threadIdKey
+        await ctx.scene.enter('chatScene')
+    })
+
+    menuScene.command(chat.command, async (ctx) => {
+        ctx.session.adminChatId = chat.id;
+        ctx.session.threadKey = chat.threadIdKey
+        await ctx.scene.enter('chatScene')
+    })
 })
 
 module.exports = menuScene;

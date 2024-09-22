@@ -1,13 +1,15 @@
 const dotenv = require("dotenv");
+
+dotenv.config()
+
 const {Telegraf, Scenes} = require("telegraf");
 const LocalSession = require('telegraf-session-local')
 const startHandler = require("./src/start-handler");
 const menuScene = require("./src/scenes/menu-scene");
 const chatScene = require("./src/scenes/chat-scene");
-const isAdmin = require("./src/is-admin");
+const isAdmin = require("./src/utils/is-admin");
 const resendToAdmin = require("./src/resend-to-admin");
 const resendToUser = require("./src/resend-to-user");
-dotenv.config()
 
 const bot = new Telegraf(process.env.API_KEY_BOT)
 
@@ -30,7 +32,6 @@ bot.on('message', async ctx => {
         if (!isAdmin(ctx.update.message.chat.id)) return;
         await resendToUser(ctx)
     } catch (e) {
-        console.log(e)
         await ctx.reply('Sorry! I have some troubles :-(')
     }
 })
