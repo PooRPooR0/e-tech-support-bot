@@ -19,6 +19,12 @@ chatScene.command('menu', async (ctx) => {
 })
 
 getAdminChats().forEach((chat) => {
+    chatScene.action(chat.action, async (ctx) => {
+        ctx.session.adminChatId = chat.id;
+        ctx.session.threadKey = chat.threadIdKey
+        await ctx.scene.enter('chatScene')
+    })
+
     chatScene.command(chat.command, async (ctx) => {
         ctx.session.adminChatId = chat.id;
         ctx.session.threadKey = chat.threadIdKey
